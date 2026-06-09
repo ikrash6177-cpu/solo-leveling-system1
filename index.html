@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IYI - Improve Yourself Infinitely</title>
+  
+  <!-- Tailwind CSS CDN for styling utility (Optional fallback) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React, React DOM, and Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Black+Han+Sans&family=Exo+2:ital,wght@0,800;0,900;1,900&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background: #02020a;
+      color: #eef0f8;
+      font-family: 'Rajdhani', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    
+    input, textarea, select, button {
+      font-family: inherit;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #ffffff15;
+      border-radius: 99px;
+    }
+    
+    input::placeholder, textarea::placeholder {
+      color: #3a3a4a;
+    }
+
+
+    /* System Animations */
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes popIn {
+      from { transform: scale(0.2) rotate(-10deg); opacity: 0; }
+      to { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-200%); }
+      100% { transform: translateX(200%); }
+    }
+    @keyframes burst {
+      0% { transform: translate(0,0) scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0) rotate(720deg); opacity: 0; }
+    }
+    @keyframes fadeTab {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100vh); }
+    }
+
+
+    .tab-in {
+      animation: fadeTab 0.24s ease both;
+    }
+  </style>
+</head>
+<body>
+
+
+  <!-- App Anchor Root -->
+  <div id="root"></div>
+
+
+  <!-- React Source Code compiled via Babel -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+
+    // ─── 100 Level Titles ─────────────────────────────────────────────────────
+    const LEVELS = [
+      {title:"The Weakest Hunter of All Mankind",rank:"E",color:"#22c55e",bg:"#0a1a0a"},
+      {title:"E-Rank Gate Crawler",rank:"E",color:"#22c55e",bg:"#091509"},
+      {title:"One Who Trembles Before Shadows",rank:"E",color:"#16a34a",bg:"#081408"},
+      {title:"Survivor of the First Gate",rank:"E",color:"#15803d",bg:"#071207"},
+      {title:"One Who Barely Made It Out",rank:"E",color:"#166534",bg:"#061006"},
+      {title:"The Forgotten Applicant",rank:"E",color:"#0e7490",bg:"#050e12"},
+      {title:"D-Rank Aspirant",rank:"D",color:"#0ea5e9",bg:"#050c10"},
+      {title:"One with No Magic Core",rank:"D",color:"#0284c7",bg:"#040b0f"},
+      {title:"Ghost of the Dungeon Depths",rank:"D",color:"#0369a1",bg:"#03090d"},
+      {title:"Hunter Who Sees Only Darkness",rank:"D",color:"#1d4ed8",bg:"#030810"},
+      {title:"One Who Chose to Rise",rank:"D",color:"#2563eb",bg:"#04090f"},
+      {title:"C-Rank Breakthrough",rank:"C",color:"#60a5fa",bg:"#05080f"},
+      {title:"Awakened from Slumber",rank:"C",color:"#93c5fd",bg:"#06091a"},
+      {title:"Steel-Willed Novice",rank:"C",color:"#818cf8",bg:"#07081a"},
+      {title:"First Blood of a True Hunter",rank:"C",color:"#dc2626",bg:"#120505"},
+      {title:"One Who Endured One Thousand Strikes",rank:"C",color:"#2dd4bf",bg:"#050f0e"},
+      {title:"Shadow Step Learner",rank:"C",color:"#818cf8",bg:"#06060f"},
+      {title:"Mana Vessel Expanding",rank:"C",color:"#34d399",bg:"#050f0a"},
+      {title:"One Who Hunts Alone",rank:"C",color:"#a78bfa",bg:"#07060f"},
+      {title:"Born Again from Failure",rank:"C",color:"#facc15",bg:"#0f0d04"},
+      {title:"The Shadows Obey Me Now",rank:"B",color:"#818cf8",bg:"#060610"},
+      {title:"B-Rank Gate Conqueror",rank:"B",color:"#86efac",bg:"#050d06"},
+      {title:"One Who Commands the Void",rank:"B",color:"#6366f1",bg:"#050610"},
+      {title:"Reaper of Red Gates",rank:"B",color:"#f87171",bg:"#0f0404"},
+      {title:"Iron Blood Warrior",rank:"B",color:"#fbbf24",bg:"#0e0c04"},
+      {title:"One Whose Name Echoes in Dungeons",rank:"B",color:"#c084fc",bg:"#080610"},
+      {title:"Phantom Blade Wielder",rank:"B",color:"#a5b4fc",bg:"#060610"},
+      {title:"Hunter of the Crimson Moon",rank:"B",color:"#fca5a5",bg:"#0e0606"},
+      {title:"One Who Walks Between Worlds",rank:"B",color:"#93c5fd",bg:"#04070f"},
+      {title:"Mythbreaker of the East Gate",rank:"B",color:"#a3e635",bg:"#060d04"},
+      {title:"A-Rank Sovereign",rank:"A",color:"#c4b5fd",bg:"#060510"},
+      {title:"One Who Bends Reality",rank:"A",color:"#818cf8",bg:"#050510"},
+      {title:"Apex Predator of All Gates",rank:"A",color:"#f472b6",bg:"#0f0508"},
+      {title:"Monarch of Silent Killing",rank:"A",color:"#6366f1",bg:"#040510"},
+      {title:"One Who Devours Dungeons",rank:"A",color:"#84cc16",bg:"#060d04"},
+      {title:"Void Walker Supreme",rank:"A",color:"#4f46e5",bg:"#040510"},
+      {title:"The Unkillable",rank:"A",color:"#f59e0b",bg:"#0e0a04"},
+      {title:"Gate-Breaker of the Abyss",rank:"A",color:"#3730a3",bg:"#030410"},
+      {title:"One Whose Mana Shakes the Earth",rank:"A",color:"#818cf8",bg:"#050510"},
+      {title:"S-Rank Emergence",rank:"S",color:"#ef4444",bg:"#0f0404"},
+      {title:"One the System Fears",rank:"S",color:"#6366f1",bg:"#030510"},
+      {title:"Shadow Monarch's Herald",rank:"S",color:"#4338ca",bg:"#030410"},
+      {title:"Hunter Who Shattered a Nation",rank:"S",color:"#f97316",bg:"#0f0604"},
+      {title:"Undying Flame of the Red Tower",rank:"S",color:"#dc2626",bg:"#0f0303"},
+      {title:"King of the Cursed Realm",rank:"S",color:"#a855f7",bg:"#070410"},
+      {title:"One Who Reversed Death",rank:"S",color:"#e2e8f0",bg:"#060606"},
+      {title:"Architect of Doom Gates",rank:"S",color:"#d97706",bg:"#0e0904"},
+      {title:"The World's Last Line of Defense",rank:"S",color:"#3b82f6",bg:"#030810"},
+      {title:"One Who Commands Ten Thousand Shadows",rank:"S",color:"#4f46e5",bg:"#030410"},
+      {title:"Beyond the Peak of Humanity",rank:"S",color:"#818cf8",bg:"#040510"},
+      {title:"Godslayer in Training",rank:"S+",color:"#ec4899",bg:"#0a0408"},
+      {title:"One Who Walks Above Clouds",rank:"S+",color:"#60a5fa",bg:"#03070f"},
+      {title:"Dimension Ripper",rank:"S+",color:"#d946ef",bg:"#07040f"},
+      {title:"One the Gods Dread",rank:"S+",color:"#eab308",bg:"#0e0c04"},
+      {title:"Monarch of All Realms",rank:"S+",color:"#c026d3",bg:"#060410"},
+      {title:"One Who Consumed a Dragon",rank:"S+",color:"#ea580c",bg:"#0f0604"},
+      {title:"Ruler of the Shadow Domain",rank:"S+",color:"#4338ca",bg:"#030410"},
+      {title:"Undefeated Across Ten Thousand Gates",rank:"S+",color:"#65a30d",bg:"#060d03"},
+      {title:"One Who Absorbed a Star",rank:"S+",color:"#818cf8",bg:"#040510"},
+      {title:"First to Reach the Sky Castle",rank:"S+",color:"#2563eb",bg:"#030810"},
+      {title:"Harbinger of the Final Gate",rank:"SS",color:"#9333ea",bg:"#060410"},
+      {title:"One Who Silenced the Heavens",rank:"SS",color:"#6366f1",bg:"#040510"},
+      {title:"Destroyer of Divine Chains",rank:"SS",color:"#b91c1c",bg:"#0f0303"},
+      {title:"Sovereign of the Sunless World",rank:"SS",color:"#818cf8",bg:"#020206"},
+      {title:"The Immortal Hunter",rank:"SS",color:"#1d4ed8",bg:"#030710"},
+      {title:"One Who Bent the Will of Stars",rank:"SS",color:"#4338ca",bg:"#030410"},
+      {title:"Phantom Emperor of the Abyss",rank:"SS",color:"#7c3aed",bg:"#040310"},
+      {title:"One of the Eleven Monarchs",rank:"SS",color:"#818cf8",bg:"#040410"},
+      {title:"World Ender's Equal",rank:"SS",color:"#c2410c",bg:"#0e0604"},
+      {title:"One Who Swallowed the Void",rank:"SS",color:"#312e81",bg:"#020210"},
+      {title:"Transcendent of the Third Realm",rank:"SSS",color:"#1d4ed8",bg:"#020610"},
+      {title:"The System's True Master",rank:"SSS",color:"#4f46e5",bg:"#030410"},
+      {title:"One Who Broke the Rank Ceiling",rank:"SSS",color:"#ca8a04",bg:"#0e0d04"},
+      {title:"Sovereign Above All Sovereigns",rank:"SSS",color:"#9333ea",bg:"#050410"},
+      {title:"One Who Bleeds Starlight",rank:"SSS",color:"#6366f1",bg:"#030510"},
+      {title:"Devourer of Divine Beasts",rank:"SSS",color:"#b45309",bg:"#0e0804"},
+      {title:"The One the Abyss Calls Father",rank:"SSS",color:"#7c3aed",bg:"#030310"},
+      {title:"Architect of New Worlds",rank:"SSS",color:"#1e40af",bg:"#020610"},
+      {title:"One Whose Footsteps Crack Dimensions",rank:"SSS",color:"#7c3aed",bg:"#040310"},
+      {title:"Last King After the War of Gods",rank:"SSS",color:"#991b1b",bg:"#0f0202"},
+      {title:"One Who Ate the Sun",rank:"∞",color:"#d97706",bg:"#0e0804"},
+      {title:"The Absolute, Undying Shadow King",rank:"∞",color:"#4338ca",bg:"#020310"},
+      {title:"One the Universe Acknowledges",rank:"∞",color:"#312e81",bg:"#020210"},
+      {title:"Gate-God of the Infinite Void",rank:"∞",color:"#1e1b4b",bg:"#010210"},
+      {title:"The Final Sovereign",rank:"∞",color:"#4338ca",bg:"#020310"},
+      {title:"One Who Surpassed the System",rank:"∞",color:"#6d28d9",bg:"#030210"},
+      {title:"Mythbreaker of the Celestial Record",rank:"∞",color:"#4338ca",bg:"#020310"},
+      {title:"One Who Rewrote Destiny",rank:"∞",color:"#e2e8f0",bg:"#040404"},
+      {title:"The Nameless God of Hunters",rank:"∞",color:"#7c3aed",bg:"#030210"},
+      {title:"One Beyond the Reach of Death",rank:"∞",color:"#312e81",bg:"#020210"},
+      {title:"The Singular Absolute",rank:"∞",color:"#4f46e5",bg:"#020310"},
+      {title:"One Who Exists Outside of Time",rank:"∞",color:"#3730a3",bg:"#020210"},
+      {title:"Ruler of the Void Between Worlds",rank:"∞",color:"#1e1b4b",bg:"#010110"},
+      {title:"The Eternal Shadow Monarch",rank:"∞",color:"#312e81",bg:"#010110"},
+      {title:"One Who Holds All Gates",rank:"∞",color:"#7e22ce",bg:"#040210"},
+      {title:"God of the New World Order",rank:"∞",color:"#f1f5f9",bg:"#030303"},
+      {title:"The Last Entity Standing",rank:"∞",color:"#e2e8f0",bg:"#020202"},
+      {title:"One Who Became the System",rank:"∞",color:"#4338ca",bg:"#020310"},
+      {title:"Infinite Monarch of All Creation",rank:"∞",color:"#3730a3",bg:"#010210"},
+      {title:"I Am the Shadow — I Am the Light",rank:"∞",color:"#ffffff",bg:"#010101"},
+    ];
+
+
+    const RANK_ORDER = ["E","D","C","B","A","S","S+"];
+    const RANK_COLORS = {E:"#22c55e",D:"#0ea5e9",C:"#818cf8",B:"#f59e0b",A:"#c084fc",S:"#ef4444","S+":"#f97316",SS:"#9333ea",SSS:"#1d4ed8","∞":"#ffffff"};
+
+
+    // XP System Constants
+    const XP_PER = 1000;
+    const getLevel = xp => Math.min(100, Math.floor(xp/XP_PER)+1);
+    const getLevelData = lvl => LEVELS[Math.min(lvl-1,99)];
+    const xpProgress = (xp,lvl) => lvl>=100?100:Math.min(100,Math.round(((xp-(lvl-1)*XP_PER)/(XP_PER))*100));
+    const xpToNext = (xp,lvl) => lvl>=100?0:lvl*XP_PER-xp;
+
+
+    // Categories
+    const CATS=["Health","Study","Work","Fitness","Personal","Mindfulness","Creative","Social"];
+    const CAT_C={Health:"#f43f5e",Study:"#60a5fa",Work:"#a78bfa",Fitness:"#34d399",Personal:"#fbbf24",Mindfulness:"#818cf8",Creative:"#fb923c",Social:"#f472b6"};
+
+
+    // ─── Avatar SVG Component ────────────────────────────────────────────────
+    function AvatarIllustration({ level, size=400 }) {
+      const d = getLevelData(level);
+      const tier = level<=10?0:level<=30?1:level<=60?2:level<=80?3:4;
+      const c = d.color;
+      const bg = d.bg;
+      const seed = level * 13;
+      
+      const skinTones = ["#c8a882","#b89068","#a87848","#c8b090","#b8a080"];
+      const skin = skinTones[level%skinTones.length];
+      const hairColors = ["#0a0806","#0a0806","#0a0806","#1a0a06","#060414"];
+      const hair = hairColors[tier];
+
+
+      const runePoints = (cx,cy,r,n) => Array.from({length:n},(_,i)=>`${cx+r*Math.cos((i*2*Math.PI/n)-Math.PI/2)},${cy+r*Math.sin((i*2*Math.PI/n)-Math.PI/2)}`).join(" ");
+
+
+      return (
+        <svg viewBox="0 0 500 500" width={size} height={size} style={{display:"block", borderRadius: "0px"}}>
+          <defs>
+            <radialGradient id={`abg${level}`} cx="50%" cy="35%" r="70%">
+              <stop offset="0%" stopColor={`${c}22`}/>
+              <stop offset="100%" stopColor={bg}/>
+            </radialGradient>
+            <radialGradient id={`bodyg${level}`} cx="45%" cy="30%" r="65%">
+              <stop offset="0%" stopColor={tier<=1?"#2a3a2a":tier<=2?"#1a1430":"#0e0820"}/>
+              <stop offset="100%" stopColor="#000"/>
+            </radialGradient>
+            <radialGradient id={`sking${level}`} cx="40%" cy="35%" r="60%">
+              <stop offset="0%" stopColor={skin}/>
+              <stop offset="100%" stopColor={`${skin}88`}/>
+            </radialGradient>
+            <radialGradient id={`eyeg${level}`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor={tier>=2?c:"white"}/>
+              <stop offset="100%" stopColor={tier>=2?`${c}00`:"#88888800"}/>
+            </radialGradient>
+            <radialGradient id={`aurag${level}`} cx="50%" cy="40%" r="50%">
+              <stop offset="0%" stopColor={`${c}35`}/>
+              <stop offset="60%" stopColor={`${c}10`}/>
+              <stop offset="100%" stopColor="transparent"/>
+            </radialGradient>
+            <linearGradient id={`hairg${level}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={hair}/>
+              <stop offset="100%" stopColor={`${hair}cc`}/>
+            </linearGradient>
+            <linearGradient id={`armorg${level}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={tier<=1?"#1e2e1e":tier<=2?"#14102a":tier<=3?"#0a0620":"#050210"}/>
+              <stop offset="100%" stopColor={tier<=1?"#0a140a":"#060310"}/>
+            </linearGradient>
+            <filter id={`fg${level}`} x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id={`fbig${level}`} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="10" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id={`fsoft${level}`} x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <clipPath id={`aclip${level}`}><rect width="500" height="500"/></clipPath>
+            <linearGradient id={`groundg${level}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="transparent"/>
+              <stop offset="100%" stopColor="#000"/>
+            </linearGradient>
+          </defs>
+
+
+          <g clipPath={`url(#aclip${level})`}>
+            <rect width="500" height="500" fill={bg}/>
+            <rect width="500" height="500" fill={`url(#abg${level})`}/>
+
+
+            <rect x="0" y="0" width="70" height="500" fill={`${bg}dd`}/>
+            <rect x="430" y="0" width="70" height="500" fill={`${bg}dd`}/>
+            {[80,160,240,320,400].map((y,i)=>(
+              <g key={i}>
+                <line x1="0" y1={y} x2="70" y2={y} stroke={`${c}15`} strokeWidth="1"/>
+                <line x1="430" y1={y+40} x2="500" y2={y+40} stroke={`${c}15`} strokeWidth="1"/>
+              </g>
+            ))}
+            <rect x="0" y="0" width="500" height="80" fill={`${bg}ee`}/>
+            <path d="M140,0 L148,55 L155,20 L162,75" stroke={c} strokeWidth="1.2" fill="none" opacity="0.3"/>
+            <path d="M320,0 L314,48 L310,18 L305,68" stroke={c} strokeWidth="0.9" fill="none" opacity="0.22"/>
+
+
+            <g opacity={tier>=2?0.75:0.55} filter={`url(#fbig${level})`} transform="translate(72,240)">
+              <circle cx="0" cy="0" r="115" fill="none" stroke={c} strokeWidth="3.5"/>
+              <circle cx="0" cy="0" r="88" fill="none" stroke={c} strokeWidth="1.5"/>
+              <circle cx="0" cy="0" r="60" fill="none" stroke={c} strokeWidth="1"/>
+              {[0,30,60,90,120,150,180,210,240,270,300,330].map((a,i)=>(
+                <line key={i} x1={60*Math.cos(a*Math.PI/180)} y1={60*Math.sin(a*Math.PI/180)}
+                  x2={115*Math.cos(a*Math.PI/180)} y2={115*Math.sin(a*Math.PI/180)}
+                  stroke={c} strokeWidth={i%3===0?"1.8":"1"} opacity={i%3===0?0.9:0.5}/>
+              ))}
+              <polygon points={runePoints(0,0,22,6)} fill="none" stroke={c} strokeWidth="1" opacity="0.8"/>
+            </g>
+
+
+            <ellipse cx="255" cy="310" rx="150" ry="220" fill={`url(#aurag${level})`} filter={`url(#fbig${level})`}/>
+
+
+            {tier===0 && (
+              <g>
+                <ellipse cx="258" cy="466" rx="85" ry="14" fill="#000" opacity="0.65"/>
+                <path d="M200,288 Q216,276 252,272 Q288,276 302,288 L312,380 Q252,402 194,378 Z" fill="#3c3e36"/>
+                <ellipse cx="252" cy="238" rx="40" ry="45" fill={`url(#sking${level})`}/>
+                <path d="M214,218 Q252,178 290,210 L286,232 Z" fill={`url(#hairg${level})`}/>
+                <ellipse cx="237" cy="240" rx="11" ry="9.5" fill="white"/>
+                <ellipse cx="267" cy="237" rx="11" ry="9.5" fill="white"/>
+                <circle cx="241" cy="241" r="7" fill="#3a2810"/>
+                <circle cx="269" cy="238" r="7" fill="#3a2810"/>
+              </g>
+            )}
+
+
+            {tier===1 && (
+              <g>
+                <ellipse cx="255" cy="478" rx="78" ry="13" fill="#000" opacity="0.6"/>
+                <path d="M196,228 Q252,204 308,228 L314,360 Q252,384 190,360Z" fill={`url(#armorg${level})`}/>
+                <circle cx="252" cy="268" r="18" fill={c} opacity="0.5" filter={`url(#fg${level})`}/>
+                <circle cx="252" cy="268" r="11" fill={c} opacity="0.9"/>
+                <ellipse cx="252" cy="186" rx="36" ry="41" fill={`url(#sking${level})`}/>
+                <path d="M218,168 Q252,134 286,162 Z" fill={`url(#hairg${level})`}/>
+                <ellipse cx="238" cy="187" rx="10" ry="8" fill="white"/>
+                <ellipse cx="266" cy="187" rx="10" ry="8" fill="white"/>
+                <circle cx="240" cy="188" r="6.5" fill="#1a3210"/>
+                <circle cx="267" cy="188" r="6.5" fill="#1a3210"/>
+              </g>
+            )}
+
+
+            {tier===2 && (
+              <g>
+                <ellipse cx="252" cy="480" rx="90" ry="15" fill={c} opacity="0.18" filter={`url(#fbig${level})`}/>
+                <path d="M188,146 Q252,118 316,146 L322,356 Q252,384 182,356Z" fill="#0e0820"/>
+                <circle cx="252" cy="202" r="26" fill={c} opacity="0.45" filter={`url(#fg${level})`}/>
+                <circle cx="252" cy="202" r="16" fill={c} opacity="0.9"/>
+                <ellipse cx="252" cy="118" rx="34" ry="38" fill={`url(#sking${level})`}/>
+                <ellipse cx="236" cy="116" rx="9" ry="6.5" fill={c} filter={`url(#fg${level})`}/>
+                <ellipse cx="268" cy="116" rx="9" ry="6.5" fill={c} filter={`url(#fg${level})`}/>
+              </g>
+            )}
+
+
+            {tier===3 && (
+              <g>
+                <ellipse cx="252" cy="478" rx="110" ry="18" fill={c} opacity="0.22" filter={`url(#fbig${level})`}/>
+                <path d="M192,118 Q252,88 312,118 L318,358 Q252,384 186,358Z" fill="#060310"/>
+                {[168,218,262].map((y,i)=>(
+                  <g key={i}>
+                    <circle cx="252" cy={y} r={20-i*4} fill={c} opacity={0.5-i*0.08} filter={`url(#fg${level})`}/>
+                  </g>
+                ))}
+                <ellipse cx="252" cy="78" rx="34" ry="38" fill={`url(#sking${level})`}/>
+                <ellipse cx="236" cy="80" rx="9.5" ry="7" fill={c} filter={`url(#fg${level})`}/>
+                <ellipse cx="268" cy="80" rx="9.5" ry="7" fill={c} filter={`url(#fg${level})`}/>
+              </g>
+            )}
+
+
+            {tier===4 && (
+              <g>
+                <circle cx="252" cy="230" r="170" fill={c} opacity="0.06" filter={`url(#fbig${level})`}/>
+                <path d="M190,112 Q252,80 314,112 L320,360 Q252,388 184,360Z" fill="#040110"/>
+                {[158,204,244,278].map((y,i)=>(
+                  <g key={i}>
+                    <circle cx="252" cy={y} r={22-i*3} fill={c} opacity={0.5-i*0.06} filter={`url(#fg${level})`}/>
+                  </g>
+                ))}
+                <ellipse cx="252" cy="74" rx="36" ry="40" fill={`url(#sking${level})`}/>
+                <ellipse cx="234" cy="74" rx="11" ry="8" fill={c} filter={`url(#fg${level})`}/>
+                <ellipse cx="270" cy="74" rx="11" ry="8" fill={c} filter={`url(#fg${level})`}/>
+              </g>
+            )}
+
+
+            <rect x="0" y="440" width="500" height="60" fill={`url(#groundg${level})`}/>
+          </g>
+        </svg>
+      );
+    }
+
+
+    // ─── Cinematic Profile Card ──────────────────────────────────────────────
+    function ProfileCard({ level, size="full" }) {
+      const d = getLevelData(level);
+      const c = d.color;
+      const rankColor = RANK_COLORS[d.rank] || c;
+      const isSmall = size === "mini";
+
+
+      return (
+        <div style={{
+          position:"relative", width:"100%", aspectRatio:"1/1", borderRadius: isSmall?8:12, overflow:"hidden",
+          border:`1px solid ${c}45`, boxShadow:`0 0 40px ${c}25, 0 0 80px ${c}10, inset 0 0 40px rgba(0,0,0,0.5)`
+        }}>
+          <AvatarIllustration level={level} size={500}/>
+
+
+          <div style={{
+            position:"absolute", top: isSmall?8:16, left: isSmall?8:16,
+            background:"rgba(0,12,4,0.88)", border:`1.5px solid ${c}80`,
+            borderRadius:4, padding: isSmall?"6px 10px":"14px 20px",
+            backdropFilter:"blur(8px)", maxWidth: isSmall?"55%":"58%",
+            boxShadow:`inset 0 0 24px ${c}12, 0 4px 20px rgba(0,0,0,0.6)`
+          }}>
+            <div style={{fontFamily:"'Rajdhani',monospace", fontSize: isSmall?11:22, fontWeight:700, color:c, letterSpacing: isSmall?1:2, marginBottom: isSmall?2:6, textShadow:`0 0 12px ${c}90`}}>
+              LEVEL: {level}
+            </div>
+            <div style={{fontFamily:"'Rajdhani',sans-serif", fontSize: isSmall?8:13, fontWeight:600, color:`${c}cc`, lineHeight:1.35, letterSpacing:0.5}}>
+              TITLE: {d.title}
+            </div>
+          </div>
+
+
+          <div style={{
+            position:"absolute", bottom: isSmall?8:14, right: isSmall?8:14,
+            background:"rgba(0,0,0,0.8)", border:`1px solid ${rankColor}70`,
+            borderRadius:3, padding: isSmall?"3px 8px":"5px 14px", backdropFilter:"blur(4px)"
+          }}>
+            <div style={{fontFamily:"'Rajdhani',sans-serif", fontSize: isSmall?8:11, color:rankColor, fontWeight:700, letterSpacing: isSmall?1:2.5, textShadow:`0 0 8px ${rankColor}80`}}>
+              {d.rank}-RANK
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+
+    // ─── XP / Level System Bar ───────────────────────────────────────────────
+    function XPBar({ xp, level, color }) {
+      const p = xpProgress(xp, level);
+      const [w, setW] = useState(0);
+      useEffect(()=>{ const t=setTimeout(()=>setW(p),100); return()=>clearTimeout(t); },[p]);
+      return (
+        <div style={{background:"rgba(255,255,255,0.05)", borderRadius:999, height:10, overflow:"hidden", border:`1px solid ${color}20`, position:"relative"}}>
+          <div style={{height:"100%", borderRadius:999, width:`${w}%`, background:`linear-gradient(90deg, ${color}60, ${color})`, transition:"width 1.2s cubic-bezier(.22,1,.36,1)", position:"relative", overflow:"hidden", boxShadow:`0 0 14px ${color}80`}}>
+            <div style={{position:"absolute", inset:0, background:"linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)", animation:"shimmer 2.8s infinite"}}/>
+          </div>
+        </div>
+      );
+    }
+
+
+    // ─── Level-Up Particles ──────────────────────────────────────────────────
+    function Particles({ color }) {
+      const p = Array.from({length:30}, (_,i)=>({
+        id:i, x:50, y:50, vx:(Math.random()-0.5)*300, vy:-(Math.random()*200+50), r:Math.random()*5+2
+      }));
+      return (
+        <div style={{position:"absolute", inset:0, pointerEvents:"none", overflow:"hidden"}}>
+          {p.map(pt => (
+            <div key={pt.id} style={{
+              position:"absolute", left:`${pt.x}%`, top:`${pt.y}%`, width:pt.r, height:pt.r, borderRadius:"50%", background:color,
+              animation:`burst 1.5s ease-out forwards`, "--dx":`${pt.vx}px`, "--dy":`${pt.vy}px`
+            }}/>
+          ))}
+        </div>
+      );
+    }
+
+
+    // ─── Level-Up Announcement Backdrop ──────────────────────────────────────
+    function LevelUpModal({ level, onClose }) {
+      const d = getLevelData(level);
+      useEffect(()=>{ const t=setTimeout(onClose,5000); return()=>clearTimeout(t); },[]);
+      return (
+        <div onClick={onClose} style={{position:"fixed", inset:0, zIndex:2000, background:"rgba(0,0,0,0.95)", backdropFilter:"blur(20px)", display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column"}}>
+          <Particles color={d.color}/>
+          <div style={{position:"relative", zIndex:2, textAlign:"center", animation:"popIn 0.6s cubic-bezier(.34,1.56,.64,1) both", width:"90%", maxWidth:400}}>
+            <div style={{fontFamily:"'Rajdhani',sans-serif", fontSize:12, letterSpacing:6, color:d.color, marginBottom:16, fontWeight:700}}>[ SYSTEM EVOLUTION ]</div>
+            <div style={{boxShadow:`0 0 8px ${d.color}60`, borderRadius:14, marginBottom:24}}>
+              <ProfileCard level={level}/>
+            </div>
+            <div style={{fontSize:24, color:"#fff", fontWeight:700, letterSpacing:2}}>LEVEL UP!</div>
+            <div style={{fontSize:14, color:`${d.color}`, letterSpacing:1, marginTop:4}}>{d.title}</div>
+          </div>
+        </div>
+      );
+    }
+
+
+    // ─── Objective Mission Cards ─────────────────────────────────────────────
+    function MissionCard({ m, onComplete, onEdit, onDelete, color }) {
+      const cc = CAT_C[m.category]||"#888";
+      const done = m.status==="completed";
+      return (
+        <div style={{
+          background:"rgba(255,255,255,0.02)", border:`1px solid ${done?"rgba(255,255,255,0.05)":color+"25"}`,
+          borderRadius:12, padding:"16px", marginBottom:12, position:"relative", opacity:done?0.4:1, transition:"all 0.2s"
+        }}>
+          <div style={{position:"absolute", left:0, top:0, bottom:0, width:4, background:cc, borderRadius:"4px 0 0 4px"}}/>
+          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+            <div style={{flex:1, minWidth:0, paddingLeft:8}}>
+              <div style={{fontWeight:700, fontSize:17, color:"#eef0f8", letterSpacing:0.5}}>{m.title}</div>
+              <div style={{fontSize:13, color:"#a0a5b5", margin:"4px 0 6px"}}>{m.description}</div>
+              <div style={{display:"flex", gap:8, alignItems:"center", fontSize:11}}>
+                <span style={{color:cc, fontWeight:700, letterSpacing:1}}>{m.category.toUpperCase()}</span>
+                <span style={{color:color, fontWeight:700}}>+{m.xp} XP</span>
+              </div>
+            </div>
+            <div style={{display:"flex", gap:6}}>
+              {!done && (
+                <button onClick={()=>onComplete(m.id)} style={{background:`${color}20`, border:`1px solid ${color}`, color:color, padding:"6px 12px", borderRadius:6, fontWeight:700}}>
+                  ⚡ CLEAR
+                </button>
+              )}
+              <button onClick={()=>onDelete(m.id)} style={{background:"rgba(239,68,68,0.1)", border:"1px solid #ef4444", color:"#ef4444", padding:"6px 10px", borderRadius:6}}>
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+
+    // ─── Mission Addition Modal ──────────────────────────────────────────────
+    function MissionModal({ mission, onSave, onClose, color }) {
+      const [form, setForm] = useState(mission || {title:"", description:"", category:"Personal", xp:100});
+      return (
+        <div style={{position:"fixed", inset:0, zIndex:1000, background:"rgba(0,0,0,0.8)", display:"flex", alignItems:"flex-end", justifyContent:"center"}} onClick={onClose}>
+          <div style={{width:"100%", maxWidth:500, background:"#080810", borderRadius:"20px 20px 0 0", padding:24, borderTop:`2px solid ${color}`} } onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:18, fontWeight:700, color:color, marginBottom:16}}>{mission?"EDIT SYSTEM GOAL":"NEW SYSTEM GOAL"}</div>
+            <input value={form.title} onChange={e=>setForm({...form, title:e.target.value})} placeholder="Objective title..." style={{width:"100%", background:"#10101c", border:"1px solid #202035", padding:12, borderRadius:8, color:"#fff", marginBottom:12, outline:"none"}}/>
+            <textarea value={form.description} onChange={e=>setForm({...form, description:e.target.value})} placeholder="Objective description details..." style={{width:"100%", background:"#10101c", border:"1px solid #202035", padding:12, borderRadius:8, color:"#fff", marginBottom:12, outline:"none", resize:"none"}} rows={2}/>
+            
+            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16}}>
+              <select value={form.category} onChange={e=>setForm({...form, category:e.target.value})} style={{background:"#10101c", border:"1px solid #202035", padding:12, borderRadius:8, color:"#fff"}}>
+                {CATS.map(c=><option key={c} value={c}>{c}</option>)}
+              </select>
+              <input type="number" value={form.xp} onChange={e=>setForm({...form, xp:parseInt(e.target.value)||0})} style={{background:"#10101c", border:"1px solid #202035", padding:12, borderRadius:8, color:color, fontWeight:700}}/>
+            </div>
+
+
+            <button onClick={()=>onSave(form)} style={{width:"100%", background:color, color:"#000", padding:14, borderRadius:8, fontWeight:700, letterSpacing:2}}>
+              ENGAGE OBJECTIVE
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+
+    // ─── Level Navigation Panel Tab ──────────────────────────────────────────
+    function LevelsTab({ totalXP, level, onReset }) {
+      const d = getLevelData(level);
+      const color = d.color;
+      const p = xpProgress(totalXP, level);
+      return (
+        <div style={{padding:"0 16px 100px"}} class="tab-in">
+          <div style={{marginBottom:20}}><ProfileCard level={level}/></div>
+          <div style={{background:"rgba(0,0,0,0.5)", border:`1px solid ${color}30`, padding:16, borderRadius:12, marginBottom:20}}>
+            <div style={{display:"flex", justifyContent:"space-between", marginBottom:8, fontSize:14}}>
+              <span>TOTAL STAT XP: <strong>{totalXP}</strong></span>
+              <span>NEXT LEVEL IN: <strong>{xpToNext(totalXP, level)} XP</strong></span>
+            </div>
+            <XPBar xp={totalXP} level={level} color={color}/>
+          </div>
+          <button onClick={onReset} style={{width:"100%", padding:12, background:"rgba(239,68,68,0.1)", border:"1px solid #ef4444", color:"#ef4444", borderRadius:8, fontWeight:700, fontSize:13}}>
+            ↺ RESET ALL SYSTEM DATA
+          </button>
+        </div>
+      );
+    }
+
+
+    // ─── Main Interface Entry Shell App ──────────────────────────────────────
+    function App() {
+      const [tab, setTab] = useState("missions");
+      const [totalXP, setTotalXP] = useState(() => parseInt(localStorage.getItem("iyi_xp") || "0"));
+      const [missions, setMissions] = useState(() => JSON.parse(localStorage.getItem("iyi_tasks") || "[]"));
+      const [modal, setModal] = useState(false);
+      const [lvlUp, setLvlUp] = useState(null);
+      const prevLvl = useRef(getLevel(totalXP));
+
+
+      const level = getLevel(totalXP);
+      const d = getLevelData(level);
+      const color = d.color;
+
+
+      useEffect(() => { localStorage.setItem("iyi_xp", totalXP); }, [totalXP]);
+      useEffect(() => { localStorage.setItem("iyi_tasks", JSON.stringify(missions)); }, [missions]);
+
+
+      const handleComplete = (id) => {
+        const target = missions.find(m => m.id === id);
+        if (!target) return;
+        const nextXP = totalXP + target.xp;
+        const nextLvl = getLevel(nextXP);
+        
+        setMissions(missions.map(m => m.id === id ? {...m, status:"completed"} : m));
+        setTotalXP(nextXP);
+
+
+        if (nextLvl > prevLvl.current) {
+          setLvlUp(nextLvl);
+          prevLvl.current = nextLvl;
+        }
+      };
+
+
+      const handleSave = (form) => {
+        setMissions([...missions, { ...form, id: Date.now().toString(), status: "pending" }]);
+        setModal(false);
+      };
+
+
+      return (
+        <div style={{maxWidth:480, margin:"0 auto", minHeight:"100vh", background:"#02020a", borderLeft:"1px solid #101025", borderRight:"1px solid #101025", position:"relative"}}>
+          
+          {/* Top Status Panel */}
+          <div style={{padding:"24px 16px 12px", background:`linear-gradient(180deg, ${color}10 0%, transparent 100%)`, borderBottom:"1px solid #151525"}}>
+            <div style={{display:"flex", alignItems:"center", justifyBetween:"space-between", gap:12}}>
+              <div style={{flex:1}}>
+                <div style={{fontFamily:"'Black Han Sans'", fontSize:28, letterSpacing:4, color:color}}>IYI</div>
+                <div style={{fontSize:10, color:"#606575", letterSpacing:1}}>IMPROVE YOURSELF INFINITELY</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontWeight:700, color:color}}>{d.rank}-RANK</div>
+                <div style={{fontSize:12, color:"#a0a5b5"}}>LV {level}</div>
+              </div>
+            </div>
+            <div style={{marginTop:12}}><XPBar xp={totalXP} level={level} color={color}/></div>
+          </div>
+
+
+          {/* Navigation Systems tabs */}
+          <div style={{display:"flex", borderBottom:"1px solid #151525", background:"#050510"}}>
+            <button onClick={()=>setTab("missions")} style={{flex:1, padding:14, color:tab==="missions"?color:"#505565", borderBottom:tab==="missions"?`2px solid ${color}`:"none", fontWeight:700, fontSize:13}}>
+              ⚔ OBJECTIVES
+            </button>
+            <button onClick={()=>setTab("levels")} style={{flex:1, padding:14, color:tab==="levels"?color:"#505565", borderBottom:tab==="levels"?`2px solid ${color}`:"none", fontWeight:700, fontSize:13}}>
+              ★ HUNTER CARD
+            </button>
+          </div>
+
+
+          {/* Main Body Switcher Routing Container */}
+          <div style={{paddingTop:16}}>
+            {tab === "missions" ? (
+              <div style={{padding:"0 16px 120px"}} class="tab-in">
+                {missions.length === 0 && (
+                  <div style={{textAlign:"center", padding:"40px 0", color:"#404555", fontSize:14}}>No objectives synchronized. Access the [+] network matrix.</div>
+                )}
+                {missions.map(m => (
+                  <MissionCard key={m.id} m={m} onComplete={handleComplete} onDelete={(id)=>setMissions(missions.filter(x=>x.id!==id))} color={color}/>
+                ))}
+                <button onClick={()=>setModal(true)} style={{position:"fixed", bottom:24, left:"50%", transform:"translateX(-50%)", width:56, height:56, borderRadius:"50%", background:color, color:"#000", fontSize:28, border:"none", fontWeight:300, cursor:"pointer", boxShadow:"0 4px 20px rgba(0,0,0,0.5)"}}>+</button>
+              </div>
+            ) : (
+              <LevelsTab totalXP={totalXP} level={level} onReset={()=>{setTotalXP(0); setMissions([]); prevLvl.current=1;}}/>
+            )}
+          </div>
+
+
+          {modal && <MissionModal color={color} onClose={()=>setModal(false)} onSave={handleSave}/>}
+          {lvlUp && <LevelUpModal level={lvlUp} onClose={()=>setLvlUp(null)}/>}
+        </div>
+      );
+    }
+
+
+    // Render directly to View Engine Root Anchor
+    const root = document.getElementById('root');
+    ReactDOM.createRoot(root).render(<App />);
+  </script>
+</body>
+</html>
+
